@@ -8,7 +8,7 @@ import (
 func TestCreate(t *testing.T) {
 	repo := NewRepository()
 	texts := []string{"a", "b", "c"}
-	path, err := repo.Create(texts)
+	path, err := repo.Create(texts, "../../font.ttf")
 	if err != nil {
 		t.Fatal("Error occured")
 	}

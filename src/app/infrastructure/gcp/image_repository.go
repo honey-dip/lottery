@@ -1,15 +1,22 @@
-package local
+package gcp
 
 import (
+	"cloud.google.com/go/storage"
+	"context"
 	"github.com/golang/freetype"
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"time"
+)
+
+const (
+	BucketName = "lottery-image"
 )
 
 type ImageRepository struct{}
@@ -22,7 +29,8 @@ func (repo *ImageRepository) Create(texts []string, fontpath string) (path strin
 	width := 600
 	height := 315
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
-	path = "/tmp/" + RandomString(20) + ".png"
+	filename := RandomString(20) + ".png"
+	path = "/tmp/" + filename
 	file, err := os.Create(path)
 	if err != nil {
 		return "", err
@@ -30,17 +38,15 @@ func (repo *ImageRepository) Create(texts []string, fontpath string) (path strin
 
 	fontBytes, err := ioutil.ReadFile(fontpath)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	f, err := freetype.ParseFont(fontBytes)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 
-	background := color.RGBA{7, 104, 159, 0xff}
-	textcolor := color.RGBA{255, 201, 69, 0xff}
+	background := color.RGBA{248, 251, 73, 0xff}
+	textcolor := color.RGBA{107, 30, 31, 0xff}
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			img.Set(x, y, background)
@@ -67,9 +73,24 @@ func (repo *ImageRepository) Create(texts []string, fontpath string) (path strin
 		pt.Y += c.PointToFixed(size * spacing)
 	}
 
-	defer file.Close()
 	png.Encode(file, img)
-	return
+	file.Close()
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+	wc := client.Bucket(BucketName).Object(filename).NewWriter(ctx)
+	t, _ := os.Open(path)
+	if _, err = io.Copy(wc, t); err != nil {
+		return "", err
+	}
+	defer wc.Close()
+	return "https://storage.googleapis.com/" + BucketName + "/" + filename, nil
 }
 
 func RandomString(n int) string {

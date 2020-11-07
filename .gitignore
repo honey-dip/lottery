@@ -1,3 +1,4 @@
 font.ttf
 .DS_Store
-
+go.sum
+.idea/

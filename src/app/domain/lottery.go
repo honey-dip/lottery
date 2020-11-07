@@ -2,7 +2,6 @@ package domain
 
 import (
 	"math/rand"
-	"time"
 )
 
 type Lottery struct {
@@ -18,9 +17,9 @@ func NewLottery(candidates []string, numberOfWinners int) *Lottery {
 	}
 }
 
-func (lottery *Lottery) Draw() {
+func (lottery *Lottery) Draw(unixTime int) {
 	lottery.Winners = []string{}
-	rand.Seed(time.Now().UTC().UnixNano())
+	rand.Seed(int64(unixTime))
 	targets := lottery.Candidates
 	rand.Shuffle(len(targets), func(i, j int) {
 		targets[i], targets[j] = targets[j], targets[i]
