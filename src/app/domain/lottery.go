@@ -24,7 +24,11 @@ func (lottery *Lottery) Draw(unixTime int) {
 	rand.Shuffle(len(targets), func(i, j int) {
 		targets[i], targets[j] = targets[j], targets[i]
 	})
-	for i := 0; i < lottery.NumberOfWinners; i++ {
+	number := lottery.NumberOfWinners
+	if (lottery.NumberOfWinners > len(targets)) {
+		number = len(targets)
+	}
+	for i := 0; i < number; i++ {
 		lottery.Winners = append(lottery.Winners, targets[i])
 	}
 }

@@ -39,15 +39,15 @@ func (repo *ImageRepository) Create(texts []string, fontpath string) (path strin
 		return
 	}
 
-	background := color.RGBA{7, 104, 159, 0xff}
-	textcolor := color.RGBA{255, 201, 69, 0xff}
+	background := color.RGBA{7, 4, 69, 0xff}
+	textcolor := color.RGBA{245, 248, 187, 0xff}
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			img.Set(x, y, background)
 		}
 	}
 
-	size := 24.0
+	size := 45.0
 	spacing := 1.5
 
 	c := freetype.NewContext()
